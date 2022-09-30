@@ -1,6 +1,16 @@
 <?php 
 require("koneksi.php");
-$email = $_GET['user_fullname'];
+require('query.php');
+// $email = $_GET['user_fullname'];
+session_start();
+if(!isset($_SESSION['id'])){
+    $_SESSION['msg']='anda harus login terlebih dahulu';
+    header('Location: login.php');
+}
+$sesID = $_SESSION['id'];
+$sesName = $_SESSION['name'];
+$sesLvl =$_SESSION['level'];
+$obj = new crud;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -105,7 +115,7 @@ $email = $_GET['user_fullname'];
         <div class="table-responsive">
             <div class="table-wrapper">
                 <div class="table-title">
-                    <div class="col-sm-8"><h1>Selamat Datang <b><?= $email; ?></b></h1></div>
+                    <div class="col-sm-8"><h1>Selamat Datang <b><?= $sesName; ?></b></h1></div>
                 </div>
                 <table border="1" class="table table-bordered">
                     <tr>
@@ -115,26 +125,37 @@ $email = $_GET['user_fullname'];
                         <td>Aksi</td>
                     </tr>
                     <?php 
-                    $query = "SELECT * FROM user_detail";
-                    $result = mysqli_query($koneksi,$query);
+                    $data=$obj->lihatData();
                     $no = 1;
-                    while($row = $row = mysqli_fetch_array($result)){
-                        $userMail = $row['user_email'];
-                        $userName = $row['user_fullname'];
+
+                    if($sesLvl == 1){
+                        $dis = "";
+                    }else{
+                        $dis = "disabled";
+                    }
+
+                    if($data->rowCount()>0){
+                    while($row = $data->fetch(PDO::FETCH_ASSOC)){
                     ?>
                     <tr>
                         <td><?= $no; ?></td>
-                        <td><?= $userMail; ?></td>
-                        <td><?= $userName; ?></td>
+                        <td><?= $row['user_email']; ?></td>
+                        <td><?= $row['user_fullname']; ?></td>
                         <td>
-                            <a class="edit" title="Edit" data-toggle="tooltip" href="edit.php?id=<?= $row["id"]; ?>"><i class="material-icons">&#xE254;</a>
-                            <a class="delete" title="Delete" data-toggle="tooltip" href="hapus.php?id=<?= $row['id']; ?>"><i class="material-icons">&#xE872;</a>
+                            <!-- <a class="edit" title="Edit" data-toggle="tooltip" href="edit.php?id=<?= $row["id"]; ?>"><i class="material-icons">&#xE254;</a>
+                            <a class="delete" title="Delete" data-toggle="tooltip" href="hapus.php?id=<?= $row['id']; ?>"><i class="material-icons">&#xE872;</a> -->
+                            <a href="edit.php?id=<?= $row['id']; ?>">
+                                <input type="button" value="edit" <?= $dis; ?>></a>
+                            <a href="hapus.php?id=<?= $row['id']; ?>">
+                                <input type="button" value="hapus" <?= $dis; ?>></a>
                         </td>
                     </tr>
                     <?php 
                     $no++;
-                    } ?>
+                    } }?>
                 </table>
+                <br>
+                <center><p><a href="logout.php">Logout</a></p></center>
             </div>
         </div>
     </div>
